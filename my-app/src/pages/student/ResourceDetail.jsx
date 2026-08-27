@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { ResourceImage } from '../../components/ui/ResourceImage';
+import { CampusMap } from '../../components/ui/CampusMap';
 import { useAppStore } from '../../app/store';
 
 function conditionWidth(c) {
@@ -113,6 +114,14 @@ export const ResourceDetail = () => {
               <AlertCircle size={11} /> Assessed during last return
             </p>
           </Card>
+
+          {/* Campus map */}
+          {resource.coords && (
+            <div className="space-y-1">
+              <h3 className="font-serif text-base text-[var(--text-primary)]">Location</h3>
+              <CampusMap mode="single" resource={resource} />
+            </div>
+          )}
 
           {/* Owner trust */}
           {owner && (

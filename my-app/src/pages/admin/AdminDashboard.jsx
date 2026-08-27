@@ -134,30 +134,35 @@ function ExchangesTab({ exchanges, resources }) {
   );
 }
 
-function DisputesTab({ disputes, resolveDispute }) {
+function DisputesTab({ disputes, resolveDispute, users }) {
   return (
     <div className="space-y-3">
       {disputes.length === 0 && <Card className="text-center py-8 text-[var(--text-secondary)]">No disputes.</Card>}
-      {disputes.map(d => (
-        <Card key={d.id} className="space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="font-semibold text-sm text-[var(--text-primary)]">{d.issue.type}</div>
-              <div className="text-[10px] font-mono text-[var(--text-tertiary)]">{d.id} · {d.exchangeId}</div>
+      {disputes.map(d => {
+        const reporter = users?.find(u => u.id === d.reporterId);
+        return (
+          <Card key={d.id} className="space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="font-semibold text-sm text-[var(--text-primary)]">{d.issue.type}</div>
+                <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
+                  {d.id} · {d.exchangeId} · Reported by {reporter?.name ?? d.reporterId}
+                </div>
+              </div>
+              <Badge variant={d.status === 'RESOLVED' ? 'success' : 'warning'}>{d.status.replace('_', ' ')}</Badge>
             </div>
-            <Badge variant={d.status === 'RESOLVED' ? 'success' : 'warning'}>{d.status.replace('_', ' ')}</Badge>
-          </div>
-          <p className="text-sm text-[var(--text-secondary)]">{d.issue.description}</p>
-          {d.status === 'RESOLVED' && d.resolution && (
-            <p className="text-xs text-[var(--success)] bg-[var(--success)]/10 px-3 py-2 rounded-lg">{d.resolution}</p>
-          )}
-          {d.status === 'UNDER_REVIEW' && (
-            <Button size="sm" variant="secondary" onClick={() => resolveDispute(d.id, 'Reviewed and resolved by admin.')}>
-              Mark Resolved
-            </Button>
-          )}
-        </Card>
-      ))}
+            <p className="text-sm text-[var(--text-secondary)]">{d.issue.description}</p>
+            {d.status === 'RESOLVED' && d.resolution && (
+              <p className="text-xs text-[var(--success)] bg-[var(--success)]/10 px-3 py-2 rounded-lg">{d.resolution}</p>
+            )}
+            {d.status === 'UNDER_REVIEW' && (
+              <Button size="sm" variant="secondary" onClick={() => resolveDispute(d.id, 'Reviewed and resolved by admin.')}>
+                Mark Resolved
+              </Button>
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 }
@@ -195,7 +200,7 @@ export const AdminDashboard = () => {
       {tab === 'resources' && <ResourcesTab resources={resources} approveResource={approveResource} rejectResource={rejectResource} />}
       {tab === 'users'     && <UsersTab users={users} flagUser={flagUser} />}
       {tab === 'exchanges' && <ExchangesTab exchanges={exchanges} resources={resources} />}
-      {tab === 'disputes'  && <DisputesTab disputes={disputes} resolveDispute={resolveDispute} />}
+      {tab === 'disputes'  && <DisputesTab disputes={disputes} resolveDispute={resolveDispute} users={users} />}
     </div>
   );
 };

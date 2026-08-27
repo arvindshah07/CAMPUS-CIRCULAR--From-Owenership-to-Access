@@ -1,6 +1,6 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
+import { useAppStore } from './store';
 import { Discover }         from '../pages/student/Discover';
 import { NeedDiscovery }    from '../pages/student/NeedDiscovery';
 import { ResourceDetail }   from '../pages/student/ResourceDetail';
@@ -10,12 +10,19 @@ import { Community }        from '../pages/student/Community';
 import { Profile }          from '../pages/student/Profile';
 import { Impact }           from '../pages/student/Impact';
 import { AdminDashboard }   from '../pages/admin/AdminDashboard';
+import { Login }            from '../pages/auth/Login';
+
+const RequireAuth = ({ children }) => {
+  const currentUser = useAppStore(s => s.currentUser);
+  return currentUser ? children : <Navigate to="/login" replace />;
+};
 
 export const AppRoutes = () => {
   const location = useLocation();
   return (
     <Routes location={location}>
-      <Route path="/" element={<AppLayout />}>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
         <Route index                          element={<Discover />} />
         <Route path="needs"                   element={<NeedDiscovery />} />
         <Route path="resource/:id"            element={<ResourceDetail />} />

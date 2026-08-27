@@ -1,11 +1,6 @@
 import { forwardRef } from 'react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { motion } from 'framer-motion';
-
-export function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from './utils';
 
 export const Button = forwardRef(({ className, variant = 'primary', size = 'md', disabled, children, ...props }, ref) => {
   const base = 'inline-flex items-center justify-center font-medium transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';

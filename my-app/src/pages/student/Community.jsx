@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, Plus, X, CheckCircle2, Clock } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -14,7 +15,7 @@ function timeAgo(iso) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-function RequestCard({ req, users, isOwn }) {
+function RequestCard({ req, users, isOwn, onFindMatches }) {
   const author = users.find(u => u.id === req.authorId);
   return (
     <Card className="space-y-3">
@@ -41,15 +42,16 @@ function RequestCard({ req, users, isOwn }) {
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
         <span className="text-xs text-[var(--text-tertiary)]">{req.views} views · {req.responses} responses</span>
-        {isOwn && req.responses > 0 && (
-          <button className="text-xs text-[var(--accent)] hover:underline font-medium">View matches →</button>
-        )}
+        <button onClick={() => onFindMatches(req.need)} className="text-xs text-[var(--accent)] hover:underline font-medium">
+          {isOwn && req.responses > 0 ? 'View matches →' : 'Find matches with AI →'}
+        </button>
       </div>
     </Card>
   );
 }
 
 export const Community = () => {
+  const navigate            = useNavigate();
   const communityRequests  = useAppStore(s => s.communityRequests);
   const currentUser         = useAppStore(s => s.currentUser);
   const users               = useAppStore(s => s.users);
@@ -108,7 +110,15 @@ export const Community = () => {
         {tab === 'browse' && (
           othersRequests.length === 0
             ? <Card className="text-center py-10 text-[var(--text-secondary)]">No community requests yet.</Card>
-            : othersRequests.map(req => <RequestCard key={req.id} req={req} users={users} isOwn={false} />)
+            : othersRequests.map(req => (
+                <RequestCard
+                  key={req.id}
+                  req={req}
+                  users={users}
+                  isOwn={false}
+                  onFindMatches={(need) => navigate('/needs', { state: { query: need } })}
+                />
+              ))
         )}
         {tab === 'mine' && (
           myRequests.length === 0
@@ -117,7 +127,15 @@ export const Community = () => {
                 <p className="text-[var(--text-secondary)]">You haven't posted any requests yet.</p>
                 <Button size="sm" variant="secondary" onClick={() => setShowModal(true)}>Post your first request</Button>
               </Card>
-            : myRequests.map(req => <RequestCard key={req.id} req={req} users={users} isOwn />)
+            : myRequests.map(req => (
+                <RequestCard
+                  key={req.id}
+                  req={req}
+                  users={users}
+                  isOwn
+                  onFindMatches={(need) => navigate('/needs', { state: { query: need } })}
+                />
+              ))
         )}
       </div>
 

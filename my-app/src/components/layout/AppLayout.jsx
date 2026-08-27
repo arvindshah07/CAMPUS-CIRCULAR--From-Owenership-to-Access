@@ -1,5 +1,6 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Sparkles, ArrowLeftRight, Users, BarChart2, User, LayoutDashboard, Sun, Moon, Monitor } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Sparkles, ArrowLeftRight, Users, BarChart2, User, LayoutDashboard, Sun, Moon, Monitor, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { useAppStore } from '../../app/store';
 
 const NAV_ITEMS = [
@@ -54,39 +55,62 @@ function CampusPulse() {
   );
 }
 
-// ─── Desktop Sidebar ────────────────────────────────────────────
+// ─── Desktop Sidebar (collapsible → rail) ───────────────────────
 function Sidebar() {
-  const location = useLocation();
+  const location  = useLocation();
+  const navigate  = useNavigate();
   const currentUser = useAppStore(s => s.currentUser);
+  const logout      = useAppStore(s => s.logout);
+
+  const [collapsed, setCollapsed] = useState(() =>
+    localStorage.getItem('sidebar-collapsed') === 'true'
+  );
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', collapsed);
+  }, [collapsed]);
+
+  const rail = collapsed;
 
   return (
-    <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0 border-r border-[var(--border)] bg-[var(--surface)] overflow-y-auto">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-[var(--border)]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-[var(--bg)] font-bold text-sm shrink-0">
-            CC
-          </div>
-          <div>
+    <aside
+      style={{ width: rail ? 64 : 240 }}
+      className="hidden lg:flex flex-col shrink-0 h-screen sticky top-0 border-r border-[var(--border)] bg-[var(--surface)] overflow-y-auto transition-[width] duration-200"
+    >
+      {/* Logo row */}
+      <div className={`flex items-center border-b border-[var(--border)] ${rail ? 'justify-center py-4 px-0' : 'gap-2.5 px-5 py-5'}`}>
+        <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-[var(--bg)] font-bold text-sm shrink-0">
+          CC
+        </div>
+        {!rail && (
+          <div className="min-w-0">
             <div className="font-serif font-bold text-sm leading-tight text-[var(--text-primary)]">Campus Circular</div>
             <div className="text-[10px] text-[var(--text-tertiary)]">From Ownership to Access</div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
+      <nav className={`flex-1 py-4 space-y-0.5 ${rail ? 'px-1.5' : 'px-3'}`}>
         {NAV_ITEMS.map(({ label, path, icon: Icon }) => {
           const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
-          return (
+          return rail ? (
+            <Link
+              key={path}
+              to={path}
+              title={label}
+              aria-label={label}
+              className={`flex items-center justify-center w-full h-10 rounded-xl transition-colors
+                ${isActive ? 'bg-[var(--accent)] text-[var(--bg)]' : 'text-[var(--text-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'}`}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+            </Link>
+          ) : (
             <Link
               key={path}
               to={path}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                ${isActive
-                  ? 'bg-[var(--accent)] text-[var(--bg)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
-                }`}
+                ${isActive ? 'bg-[var(--accent)] text-[var(--bg)]' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'}`}
             >
               <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
               {label}
@@ -96,18 +120,43 @@ function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 pb-5 space-y-3">
-        <CampusPulse />
-        <ThemeToggle />
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[var(--surface-raised)]">
-          <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center font-serif font-bold text-sm shrink-0">
-            {currentUser.name.charAt(0)}
+      <div className={`pb-4 space-y-2 ${rail ? 'px-1.5' : 'px-3'}`}>
+        {!rail && <CampusPulse />}
+        {!rail && <ThemeToggle />}
+
+        {/* User chip */}
+        {rail ? (
+          <Link to="/profile" title={currentUser.name} aria-label="Profile"
+            className="flex items-center justify-center w-full h-10 rounded-xl hover:bg-[var(--surface-hover)] transition-colors">
+            <div className="w-7 h-7 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center font-serif font-bold text-xs">
+              {currentUser.name.charAt(0)}
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[var(--surface-raised)]">
+            <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center font-serif font-bold text-sm shrink-0">
+              {currentUser.name.charAt(0)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-[var(--text-primary)] truncate">{currentUser.name}</div>
+              <div className="text-[10px] text-[var(--text-tertiary)]">Trust {currentUser.trustScore}/100</div>
+            </div>
+            <button onClick={() => { logout(); navigate('/login'); }} aria-label="Logout"
+              className="text-[var(--text-tertiary)] hover:text-[var(--danger)] transition-colors shrink-0">
+              <LogOut size={14} />
+            </button>
           </div>
-          <div className="min-w-0">
-            <div className="text-xs font-semibold text-[var(--text-primary)] truncate">{currentUser.name}</div>
-            <div className="text-[10px] text-[var(--text-tertiary)]">Trust {currentUser.trustScore}/100</div>
-          </div>
-        </div>
+        )}
+
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setCollapsed(v => !v)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className={`flex items-center justify-center rounded-xl h-9 w-full text-[var(--text-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors`}
+        >
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {!collapsed && <span className="text-xs ml-2">Collapse</span>}
+        </button>
       </div>
     </aside>
   );
@@ -148,18 +197,17 @@ function MobileHeader() {
   const currentUser = useAppStore(s => s.currentUser);
   return (
     <header className="md:hidden sticky top-0 z-20 bg-[var(--surface)]/90 backdrop-blur-md border-b border-[var(--border)] px-4 py-3 flex items-center justify-between">
-      <div className="flex items-center gap-2">
+      <Link to="/" className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center text-[var(--bg)] font-bold text-xs">
           CC
         </div>
         <span className="font-serif font-bold text-base text-[var(--text-primary)]">Campus Circular</span>
-      </div>
+      </Link>
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse" />
-          1,284
-        </div>
         <ThemeToggle compact />
+        <Link to="/profile" aria-label="Profile" className="w-7 h-7 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center text-xs font-bold font-serif">
+          {currentUser?.name?.charAt(0) ?? 'U'}
+        </Link>
       </div>
     </header>
   );

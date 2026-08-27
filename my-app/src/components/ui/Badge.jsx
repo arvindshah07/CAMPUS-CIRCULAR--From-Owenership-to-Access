@@ -1,4 +1,4 @@
-import { cn } from './Button';
+import { cn } from './utils';
 
 export const Badge = ({ className, variant = 'default', children, ...props }) => {
   const variants = {

@@ -1,4 +1,4 @@
-export const calculateMatch = (resource, needProfile) => {
+export const calculateMatch = (resource, needProfile = {}) => {
   let score = {
     suitability: 0, // max 35
     availability: 0, // max 20
@@ -10,14 +10,16 @@ export const calculateMatch = (resource, needProfile) => {
   };
 
   let explanations = [];
+  const needCaps = Array.isArray(needProfile?.capabilities) ? needProfile.capabilities : [];
+  const resourceCaps = Array.isArray(resource?.capabilities) ? resource.capabilities : [];
 
   // Suitability (35)
   let matchedCaps = 0;
-  if (needProfile.capabilities.length > 0) {
-    needProfile.capabilities.forEach(cap => {
-      if (resource.capabilities.includes(cap)) matchedCaps++;
+  if (needCaps.length > 0) {
+    needCaps.forEach(cap => {
+      if (resourceCaps.includes(cap)) matchedCaps++;
     });
-    score.suitability = Math.round((matchedCaps / needProfile.capabilities.length) * 35);
+    score.suitability = Math.round((matchedCaps / needCaps.length) * 35);
     if (score.suitability > 25) explanations.push("Highly suitable for your need");
     else if (score.suitability > 10) explanations.push("Partially matches your need");
   } else {
@@ -26,13 +28,15 @@ export const calculateMatch = (resource, needProfile) => {
   }
 
   // Availability (20)
-  if (needProfile.urgency === "Tomorrow" && resource.availability.includes("Tomorrow")) {
+  const resourceAvail = resource?.availability || '';
+  const urgency = needProfile?.urgency || 'Flexible';
+  if (urgency === "Tomorrow" && resourceAvail.includes("Tomorrow")) {
     score.availability = 20;
     explanations.push("Available tomorrow");
-  } else if (needProfile.urgency === "Today" && resource.availability.includes("Now")) {
+  } else if (urgency === "Today" && resourceAvail.includes("Now")) {
     score.availability = 20;
     explanations.push("Available today");
-  } else if (resource.availability.includes("Now") || resource.availability.includes("Tomorrow")) {
+  } else if (resourceAvail.includes("Now") || resourceAvail.includes("Tomorrow")) {
     score.availability = 15;
     explanations.push("Available soon");
   } else {
@@ -40,14 +44,16 @@ export const calculateMatch = (resource, needProfile) => {
   }
 
   // Trust (15)
-  score.trust = Math.round((resource.trustScore / 100) * 15);
-  if (resource.trustScore > 90) explanations.push("Highly trusted owner");
+  const trustScore = resource?.trustScore ?? 80;
+  score.trust = Math.round((trustScore / 100) * 15);
+  if (trustScore > 90) explanations.push("Highly trusted owner");
 
   // Distance (10)
-  if (resource.distanceMins <= 5) {
+  const distanceMins = resource?.distanceMins ?? 10;
+  if (distanceMins <= 5) {
     score.distance = 10;
     explanations.push("Very close (< 5 mins)");
-  } else if (resource.distanceMins <= 10) {
+  } else if (distanceMins <= 10) {
     score.distance = 8;
     explanations.push("Nearby (5-10 mins)");
   } else {
@@ -55,23 +61,25 @@ export const calculateMatch = (resource, needProfile) => {
   }
 
   // Condition (10)
-  if (resource.condition === "Like New" || resource.condition === "Excellent") {
+  if (resource?.condition === "Like New" || resource?.condition === "Excellent") {
     score.condition = 10;
     explanations.push("Excellent condition");
-  } else if (resource.condition === "Good") {
+  } else if (resource?.condition === "Good") {
     score.condition = 7;
   } else {
     score.condition = 4;
   }
 
   // Cost (5)
-  if (resource.borrowingFee <= 100) score.cost = 5;
-  else if (resource.borrowingFee <= 200) score.cost = 3;
+  const fee = resource?.borrowingFee ?? 100;
+  if (fee <= 100) score.cost = 5;
+  else if (fee <= 200) score.cost = 3;
   else score.cost = 1;
 
   // Deposit (5)
-  if (resource.securityDeposit <= 500) score.deposit = 5;
-  else if (resource.securityDeposit <= 1000) {
+  const deposit = resource?.securityDeposit ?? 500;
+  if (deposit <= 500) score.deposit = 5;
+  else if (deposit <= 1000) {
     score.deposit = 3;
     explanations.push("Requires refundable deposit");
   } else {

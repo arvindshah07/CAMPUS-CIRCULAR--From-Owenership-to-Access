@@ -5,19 +5,13 @@ import { Badge } from '../../components/ui/Badge';
 import { useAppStore } from '../../app/store';
 import { ResourceImage } from '../../components/ui/ResourceImage';
 
-const STATUS_GROUPS = [
-  { label: 'Action Required', statuses: ['RETURN_DUE', 'INSPECTION', 'SETTLEMENT', 'RATED'], variant: 'warning' },
-  { label: 'Active',          statuses: ['REQUESTED', 'ACCEPTED', 'HANDOVER', 'BORROWED'],   variant: 'success' },
-  { label: 'Completed',       statuses: ['RATED'],                                            variant: 'default' },
-];
-
 const STATUS_BADGE = {
   REQUESTED:   'warning',
   ACCEPTED:    'success',
   HANDOVER:    'primary',
   BORROWED:    'success',
   RETURN_DUE:  'danger',
-  RETURNED:    'default',
+  RETURNED:    'warning',
   INSPECTION:  'warning',
   SETTLEMENT:  'warning',
   RATED:       'default',
@@ -31,8 +25,8 @@ export const MyExchanges = () => {
 
   const myExchanges = exchanges.filter(e => e.borrowerId === currentUser.id || e.ownerId === currentUser.id);
 
-  const active    = myExchanges.filter(e => ['REQUESTED','ACCEPTED','HANDOVER','BORROWED'].includes(e.status));
-  const pending   = myExchanges.filter(e => ['RETURN_DUE','INSPECTION','SETTLEMENT'].includes(e.status));
+  const active    = myExchanges.filter(e => ['REQUESTED', 'ACCEPTED', 'HANDOVER', 'BORROWED'].includes(e.status));
+  const pending   = myExchanges.filter(e => ['RETURN_DUE', 'RETURNED', 'INSPECTION', 'SETTLEMENT'].includes(e.status));
   const completed = myExchanges.filter(e => e.status === 'RATED');
 
   const groups = [

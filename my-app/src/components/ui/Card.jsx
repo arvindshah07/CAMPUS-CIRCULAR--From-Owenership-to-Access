@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { cn } from './Button';
+import { cn } from './utils';
 import { motion } from 'framer-motion';
 
 export const Card = forwardRef(({ className, children, ...props }, ref) => (

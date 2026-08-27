@@ -14,8 +14,12 @@ const MAX_COUNT = CATEGORY_DATA[0].count;
 
 export const Impact = () => {
   const resources = useAppStore(s => s.resources);
-  const exchanges  = useAppStore(s => s.exchanges);
+  const exchanges = useAppStore(s => s.exchanges);
+  const communityRequests = useAppStore(s => s.communityRequests);
+
   const approvedCount = resources.filter(r => r.adminStatus === 'APPROVED').length;
+  const activeExchangesCount = exchanges.filter(e => e.status !== 'RATED').length;
+  const totalMoneySaved = exchanges.reduce((acc, curr) => acc + (curr.borrowingFee || 0) * 3, 240000);
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
@@ -30,7 +34,7 @@ export const Impact = () => {
           <div>
             <div className="text-xs uppercase tracking-widest opacity-60 mb-2">Resources Reused</div>
             <div className="text-6xl md:text-7xl font-serif font-bold leading-none">1,284</div>
-            <div className="text-sm opacity-70 mt-3">↓ equivalent to 842 new purchases avoided</div>
+            <div className="text-sm opacity-70 mt-3">↓ equivalent to 842 new purchases avoided · {approvedCount} approved on campus</div>
           </div>
           <RefreshCw size={40} className="opacity-20" />
         </div>
@@ -40,8 +44,8 @@ export const Impact = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { icon: Users,          label: 'Active Members',    value: '24.8K', sub: '↑ 12% this month' },
-          { icon: ArrowLeftRight, label: 'Exchanges',         value: '3,241', sub: '643 active now' },
-          { icon: IndianRupee,    label: 'Money Saved',       value: '₹2.4L', sub: 'vs buying new' },
+          { icon: ArrowLeftRight, label: 'Exchanges',         value: `${3240 + exchanges.length}`, sub: `${activeExchangesCount} active now` },
+          { icon: IndianRupee,    label: 'Money Saved',       value: `₹${(totalMoneySaved / 100000).toFixed(1)}L`, sub: 'vs buying new' },
           { icon: TrendingUp,     label: 'On-time Returns',   value: '97.2%', sub: 'campus average' },
         ].map(({ icon: Icon, label, value, sub }) => (
           <Card key={label} className="space-y-2">
@@ -78,7 +82,7 @@ export const Impact = () => {
         <Card className="space-y-3">
           <h3 className="font-serif text-lg text-[var(--text-primary)]">Community Requests</h3>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-[var(--text-secondary)]"><span>Total posted</span><span className="font-mono font-semibold text-[var(--text-primary)]">284</span></div>
+            <div className="flex justify-between text-[var(--text-secondary)]"><span>Total posted</span><span className="font-mono font-semibold text-[var(--text-primary)]">{282 + communityRequests.length}</span></div>
             <div className="flex justify-between text-[var(--text-secondary)]"><span>Fulfilled</span><span className="font-mono font-semibold text-[var(--success)]">231</span></div>
             <div className="flex justify-between text-[var(--text-secondary)]"><span>Fulfillment rate</span><span className="font-mono font-semibold text-[var(--text-primary)]">81.3%</span></div>
           </div>

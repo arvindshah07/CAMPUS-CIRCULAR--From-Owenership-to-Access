@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, CheckCircle2, ChevronRight, ArrowRight, Users } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card, InteractiveCard } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
 import { CircularRoute } from '../../components/visual/CircularRoute';
 import { interpretNeed } from '../../engine/needInterpreter';
 import { rankResources } from '../../engine/matcher';
@@ -38,10 +37,12 @@ function MatchBar({ label, value, max }) {
 
 export const NeedDiscovery = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const resources           = useAppStore(s => s.resources);
+  const users               = useAppStore(s => s.users);
   const postCommunityRequest = useAppStore(s => s.postCommunityRequest);
 
-  const [input, setInput]           = useState('');
+  const [input, setInput]           = useState(location.state?.query || '');
   const [status, setStatus]         = useState('idle');
   const [results, setResults]       = useState(null);
   const [interpreted, setInterpreted] = useState(null);
@@ -67,6 +68,7 @@ export const NeedDiscovery = () => {
 
   const topResult = results?.[0];
   const hasGoodMatch = topResult && topResult.match.totalScore >= 40;
+  const topOwner = topResult ? users.find(u => u.id === topResult.resource.ownerId) : null;
 
   return (
     <div className="min-h-full flex flex-col bg-[var(--bg)]">
@@ -134,7 +136,7 @@ export const NeedDiscovery = () => {
                   needLabel="Your Need"
                   capabilityNodes={interpreted.suggestedTypes.slice(0, 4)}
                   resourceName={topResult.resource.name.split(' ').slice(0, 2).join(' ')}
-                  ownerName={topResult.resource.ownerId}
+                  ownerName={topOwner?.name ?? 'Owner'}
                   className="w-64 h-64"
                 />
               </div>

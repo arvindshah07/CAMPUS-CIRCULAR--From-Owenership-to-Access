@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, Clock, AlertCircle, Star, ArrowLeft } from 'lucide-react';
+import { Check, AlertCircle, Star, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { useAppStore } from '../../app/store';
 import { EXCHANGES_STATES, getNextState, calculateSettlement } from '../../engine/simulation';
-import { motion } from 'framer-motion';
 import { ResourceImage } from '../../components/ui/ResourceImage';
 
 const STATE_LABELS = {
@@ -46,38 +45,18 @@ export const ExchangeLifecycle = () => {
   const rateExchange   = useAppStore(s => s.rateExchange);
 
   const isNew = !!resourceId;
-  const [exchange, setExchange] = useState(null);
-  const [resource, setResource] = useState(null);
-  const [owner, setOwner]       = useState(null);
   const [days, setDays]         = useState(1);
   const [agreed, setAgreed]     = useState(false);
   const [checklist, setChecklist] = useState({});
   const [rating, setRating]     = useState({ resource: 0, owner: 0 });
 
-  useEffect(() => {
-    if (isNew) {
-      const res = resources.find(r => r.id === resourceId);
-      setResource(res);
-      setExchange({ status: 'AVAILABLE', resourceId });
-    } else {
-      const exc = exchanges.find(e => e.id === exchangeId);
-      if (exc) {
-        setExchange(exc);
-        setResource(resources.find(r => r.id === exc.resourceId));
-        setOwner(users.find(u => u.id === exc.ownerId));
-      }
-    }
-  }, [isNew, resourceId, exchangeId, exchanges, resources, users]);
+  const existingExchange = !isNew && exchangeId ? exchanges.find(e => e.id === exchangeId) : null;
+  const currentResourceId = isNew ? resourceId : existingExchange?.resourceId;
+  const resource = resources.find(r => r.id === currentResourceId);
+  const exchange = isNew ? (resource ? { status: 'AVAILABLE', resourceId } : null) : existingExchange;
+  const owner = users.find(u => u.id === (isNew ? resource?.ownerId : exchange?.ownerId));
 
-  // Keep local exchange in sync with store
-  useEffect(() => {
-    if (!isNew && exchangeId) {
-      const exc = exchanges.find(e => e.id === exchangeId);
-      if (exc) setExchange(exc);
-    }
-  }, [exchanges, isNew, exchangeId]);
-
-  if (!resource || !exchange) return <div className="p-6 text-[var(--text-secondary)]">Loading…</div>;
+  if (!resource || !exchange) return <div className="p-6 text-[var(--text-secondary)]">Exchange or resource not found.</div>;
 
   const currentStepIndex = exchange.status === 'AVAILABLE' ? -1 : EXCHANGES_STATES.indexOf(exchange.status);
 
@@ -134,6 +113,7 @@ export const ExchangeLifecycle = () => {
             <div className="min-w-0">
               <div className="font-semibold text-sm text-[var(--text-primary)] truncate">{resource.name}</div>
               <div className="text-xs text-[var(--text-secondary)]">₹{resource.borrowingFee}/day</div>
+              {owner && <div className="text-[10px] text-[var(--text-tertiary)] truncate">Owner: {owner.name}</div>}
             </div>
           </div>
 
@@ -199,6 +179,38 @@ export const ExchangeLifecycle = () => {
             </Card>
           )}
 
+          {/* REQUESTED */}
+          {exchange.status === 'REQUESTED' && (
+            <Card className="space-y-4">
+              <div className="flex items-center gap-2 text-[var(--warning)]">
+                <AlertCircle size={20} />
+                <h3 className="font-serif text-lg text-[var(--text-primary)]">Request Sent to Owner</h3>
+              </div>
+              <p className="text-sm text-[var(--text-secondary)]">
+                Your request has been sent to {owner?.name ?? 'the owner'}. Once accepted, you'll be able to proceed to handover.
+              </p>
+              <Button className="w-full" onClick={handleNext}>
+                Simulate: Owner Accepts Request
+              </Button>
+            </Card>
+          )}
+
+          {/* ACCEPTED */}
+          {exchange.status === 'ACCEPTED' && (
+            <Card className="space-y-4">
+              <div className="flex items-center gap-2 text-[var(--success)]">
+                <Check size={20} />
+                <h3 className="font-serif text-lg text-[var(--text-primary)]">Request Accepted!</h3>
+              </div>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {owner?.name ?? 'The owner'} accepted your request. Meet at {resource.location} to inspect and collect the item.
+              </p>
+              <Button className="w-full" onClick={handleNext}>
+                Proceed to Handover Inspection
+              </Button>
+            </Card>
+          )}
+
           {/* HANDOVER — condition checklist */}
           {exchange.status === 'HANDOVER' && (
             <Card className="space-y-4">
@@ -225,18 +237,53 @@ export const ExchangeLifecycle = () => {
             </Card>
           )}
 
-          {/* BORROWED / RETURN_DUE */}
-          {(exchange.status === 'BORROWED' || exchange.status === 'RETURN_DUE') && (
-            <Card className="space-y-3">
-              <h3 className="font-serif text-lg text-[var(--text-primary)]">
-                {exchange.status === 'RETURN_DUE' ? '⚠ Return Due' : 'Currently Borrowed'}
-              </h3>
+          {/* BORROWED */}
+          {exchange.status === 'BORROWED' && (
+            <Card className="space-y-4">
+              <h3 className="font-serif text-lg text-[var(--text-primary)]">Currently Borrowed</h3>
               <p className="text-sm text-[var(--text-secondary)]">
-                {exchange.status === 'RETURN_DUE'
-                  ? 'Please return the item to avoid late fees.'
-                  : 'Enjoy the item. Return it on time to keep your trust score high.'}
+                Enjoy using the {resource.name}. Return it on time to maintain your high trust score.
               </p>
-              <Button className="w-full" onClick={handleNext}>Mark as Returned</Button>
+              <div className="space-y-2 pt-2">
+                <Button className="w-full" onClick={() => updateExchange(exchange.id, { status: 'RETURNED' })}>
+                  Mark as Returned to Owner
+                </Button>
+                <Button variant="secondary" className="w-full" onClick={() => updateExchange(exchange.id, { status: 'RETURN_DUE' })}>
+                  Simulate: Return Due Date Reached
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* RETURN_DUE */}
+          {exchange.status === 'RETURN_DUE' && (
+            <Card className="space-y-4 border-[var(--warning)]/40 bg-[var(--warning)]/5">
+              <div className="flex items-center gap-2 text-[var(--warning)]">
+                <AlertCircle size={20} />
+                <h3 className="font-serif text-lg text-[var(--text-primary)]">Return Due</h3>
+              </div>
+              <p className="text-sm text-[var(--text-secondary)]">
+                The borrowing period is ending. Please return the resource to avoid late fees and keep your trust score high.
+              </p>
+              <Button className="w-full" onClick={() => updateExchange(exchange.id, { status: 'RETURNED' })}>
+                Mark as Returned to Owner
+              </Button>
+            </Card>
+          )}
+
+          {/* RETURNED */}
+          {exchange.status === 'RETURNED' && (
+            <Card className="space-y-4">
+              <div className="flex items-center gap-2 text-[var(--success)]">
+                <Check size={20} />
+                <h3 className="font-serif text-lg text-[var(--text-primary)]">Item Returned</h3>
+              </div>
+              <p className="text-sm text-[var(--text-secondary)]">
+                The resource has been handed back to {owner?.name ?? 'the owner'}. The owner will now inspect the condition.
+              </p>
+              <Button className="w-full" onClick={() => updateExchange(exchange.id, { status: 'INSPECTION' })}>
+                Start Return Inspection
+              </Button>
             </Card>
           )}
 
@@ -297,7 +344,6 @@ export const ExchangeLifecycle = () => {
           )}
 
           {/* RATED — rating UI */}
-          {exchange.status === 'INSPECTION' || exchange.status === 'SETTLEMENT' ? null : null}
           {exchange.status === 'RATED' && !exchange.rating && (
             <Card className="space-y-5">
               <h3 className="font-serif text-lg text-[var(--text-primary)]">Rate Your Experience</h3>
@@ -319,32 +365,15 @@ export const ExchangeLifecycle = () => {
 
           {exchange.status === 'RATED' && exchange.rating && (
             <Card className="text-center space-y-4 py-8">
-              <div className="text-4xl">✓</div>
+              <div className="text-4xl text-[var(--success)] font-bold">✓</div>
               <h3 className="font-serif text-xl text-[var(--text-primary)]">Exchange Complete</h3>
               <p className="text-sm text-[var(--text-secondary)]">Thank you for keeping the campus circular economy going.</p>
               <Button variant="secondary" onClick={() => navigate('/')}>Back to Discover</Button>
             </Card>
-          )}
-
-          {/* Generic advance button for intermediate states */}
-          {!['AVAILABLE', 'HANDOVER', 'BORROWED', 'RETURN_DUE', 'INSPECTION', 'SETTLEMENT', 'RATED'].includes(exchange.status) && (
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] z-30 lg:static lg:bg-transparent lg:border-none lg:p-0 lg:backdrop-blur-none">
-              <Button className="w-full" onClick={handleNext}>
-                Simulate: Move to {STATE_LABELS[getNextState(exchange.status)] ?? getNextState(exchange.status)}
-              </Button>
-            </div>
-          )}
-
-          {/* REQUESTED / ACCEPTED advance */}
-          {(exchange.status === 'REQUESTED' || exchange.status === 'ACCEPTED') && (
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] z-30 lg:static lg:bg-transparent lg:border-none lg:p-0">
-              <Button className="w-full" onClick={handleNext}>
-                Simulate: Move to {STATE_LABELS[getNextState(exchange.status)]}
-              </Button>
-            </div>
           )}
         </div>
       </div>
     </div>
   );
 };
+

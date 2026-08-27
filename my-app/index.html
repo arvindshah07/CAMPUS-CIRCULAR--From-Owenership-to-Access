@@ -10,10 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <script>
       (function() {
-        const saved = localStorage.getItem('cc-theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved === 'dark' || saved === 'light' ? saved : (saved === 'system' || !saved) && prefersDark ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
+        try {
+          const stored = localStorage.getItem('campus-circular-state');
+          const parsed = stored ? JSON.parse(stored) : null;
+          const theme = parsed?.state?.theme || 'system';
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const resolved = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+          document.documentElement.setAttribute('data-theme', resolved);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
       })();
     </script>
   </head>
