@@ -68,7 +68,7 @@ export const useAppStore = create(
   persist(
     (set, get) => ({
       // ─── Auth ───────────────────────────────────────────────────────
-      currentUser: null,
+      currentUser: initialUsers[0],
       users: initialUsers,
 
       login: (userId) => {
@@ -103,16 +103,21 @@ export const useAppStore = create(
         const returnDate = new Date(now);
         returnDate.setDate(returnDate.getDate() + days);
 
+        const trustScore = get().currentUser?.trustScore ?? 80;
+        const depositCalc = computeDeposit(resource.securityDeposit, trustScore);
+
         const newExchange = {
           id: `EXC-${Date.now()}`,
           resourceId,
-          borrowerId: get().currentUser.id,
+          borrowerId: get().currentUser?.id ?? 'USR-001',
           ownerId: resource.ownerId,
           status: 'REQUESTED',
           days,
           borrowingFee,
           platformFee,
-          securityDeposit: resource.securityDeposit,
+          baseDeposit: resource.securityDeposit,
+          securityDeposit: depositCalc.adjusted,
+          depositSaving: depositCalc.saving,
           startDate: now.toISOString(),
           returnDate: returnDate.toISOString(),
           conditionBefore: null,
@@ -145,7 +150,10 @@ export const useAppStore = create(
       },
 
       // ─── Rating ─────────────────────────────────────────────
-      rateExchange: (exchangeId, rating) => {
+      rateExchange: (exchangeId, ratingOrResource, maybeOwner) => {
+        const rating = typeof ratingOrResource === 'object' && ratingOrResource !== null
+          ? ratingOrResource
+          : { resourceRating: ratingOrResource, ownerRating: maybeOwner };
         get().updateExchange(exchangeId, { rating, status: 'RATED' });
       },
 
@@ -228,6 +236,18 @@ export const useAppStore = create(
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.theme) applyTheme(state.theme);
+        if (state?.users) {
+          state.users = state.users.map(u => {
+            const init = initialUsers.find(iu => iu.id === u.id);
+            return init ? { phone: init.phone, whatsapp: init.whatsapp, email: init.email, ...u } : u;
+          });
+        }
+        if (state?.currentUser) {
+          const init = initialUsers.find(iu => iu.id === state.currentUser.id);
+          if (init) {
+            state.currentUser = { phone: init.phone, whatsapp: init.whatsapp, email: init.email, ...state.currentUser };
+          }
+        }
       },
     }
   )

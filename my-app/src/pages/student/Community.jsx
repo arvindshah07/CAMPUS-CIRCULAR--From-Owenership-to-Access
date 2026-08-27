@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Plus, X, CheckCircle2, Clock } from 'lucide-react';
+import { Users, Plus, X, CheckCircle2, Clock, Shield } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { useAppStore } from '../../app/store';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProtectedChatModal } from '../../components/protection/CircularShield';
 
 function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -17,8 +18,18 @@ function timeAgo(iso) {
 
 function RequestCard({ req, users, isOwn, onFindMatches }) {
   const author = users.find(u => u.id === req.authorId);
+  const [showChat, setShowChat] = useState(false);
+
   return (
     <Card className="space-y-3">
+      <ProtectedChatModal
+        isOpen={showChat}
+        onClose={() => setShowChat(false)}
+        peerName={author?.name || 'Peer'}
+        exchangeId={`REQ-${req.id || 'COMM'}`}
+        resourceName={req.need}
+      />
+
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center font-serif font-bold text-sm shrink-0">
@@ -26,7 +37,7 @@ function RequestCard({ req, users, isOwn, onFindMatches }) {
           </div>
           <div>
             <div className="text-xs font-semibold text-[var(--text-primary)]">{author?.name ?? 'Unknown'}</div>
-            <div className="text-[10px] text-[var(--text-tertiary)]">{author?.department}</div>
+            <div className="text-[10px] text-[var(--text-tertiary)]">{author?.department} · Trust {author?.trustScore}</div>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -40,6 +51,21 @@ function RequestCard({ req, users, isOwn, onFindMatches }) {
         {req.duration     && <span>Duration: {req.duration}</span>}
         {req.budget       && <span>Budget: {req.budget}</span>}
       </div>
+
+      {/* Direct protected connection for peers offering help */}
+      {!isOwn && author && (
+        <div className="pt-2 border-t border-[var(--border)]">
+          <Button
+            size="xs"
+            variant="secondary"
+            className="w-full gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/15 border-blue-500/20"
+            onClick={() => setShowChat(true)}
+          >
+            <Shield size={12} /> Offer Equipment & Chat Safely
+          </Button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
         <span className="text-xs text-[var(--text-tertiary)]">{req.views} views · {req.responses} responses</span>
         <button onClick={() => onFindMatches(req.need)} className="text-xs text-[var(--accent)] hover:underline font-medium">

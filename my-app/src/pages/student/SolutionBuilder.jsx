@@ -1,13 +1,12 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sparkles, Package, Users, IndianRupee, ChevronRight, CheckCircle2, AlertTriangle, Star, ArrowRight, Zap } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Sparkles, Package, Users, IndianRupee, CheckCircle2, AlertTriangle, Star, ArrowRight, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
-import { Card, InteractiveCard } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { ResourceImage } from '../../components/ui/ResourceImage';
-import { useAppStore } from '../../app/store';
-import { computeDeposit } from '../../app/store';
+import { useAppStore, computeDeposit } from '../../app/store';
 import { buildSolution } from '../../engine/solutionBuilder';
 
 const DEMO_NEEDS = [
@@ -25,7 +24,6 @@ const BUNDLE_COLORS = {
 
 function BundleCard({ bundle, users, onSelect, selected }) {
   const colors = BUNDLE_COLORS[bundle.id];
-  const ownerSet = [...new Set(bundle.items.map(i => i.resource.ownerId))];
   const totalDeposit = bundle.items.reduce((s, i) => s + i.resource.securityDeposit, 0);
 
   return (
@@ -127,13 +125,25 @@ function TradeoffExplainer({ bundles }) {
 
 export const SolutionBuilder = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const resources   = useAppStore(s => s.resources);
   const users       = useAppStore(s => s.users);
   const currentUser = useAppStore(s => s.currentUser);
 
-  const [input, setInput]         = useState('');
-  const [status, setStatus]       = useState('idle'); // idle | building | result
-  const [solution, setSolution]   = useState(null);
+  const [input, setInput] = useState(location.state?.needText || '');
+  const [status, setStatus] = useState(() => {
+    if (location.state?.needText) {
+      const sol = buildSolution(location.state.needText, resources);
+      return sol ? 'result' : 'no_match';
+    }
+    return 'idle';
+  });
+  const [solution, setSolution] = useState(() => {
+    if (location.state?.needText) {
+      return buildSolution(location.state.needText, resources);
+    }
+    return null;
+  });
   const [selectedBundle, setSelectedBundle] = useState('best');
 
   const handleBuild = () => {

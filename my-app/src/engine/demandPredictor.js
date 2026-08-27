@@ -7,7 +7,7 @@ export const CAMPUS_EVENTS = [
     daysAway: 5,
     demandSpike: { Create: 0.91, Events: 0.88, Study: 0.30, Sports: 0.20, Outdoor: 0.15, Music: 0.60 },
     description: 'Campus-wide technology festival with competitions, exhibitions and performances.',
-    icon: '⚡',
+    icon: 'TECH',
   },
   {
     id: 'EVT-002',
@@ -16,7 +16,7 @@ export const CAMPUS_EVENTS = [
     daysAway: 12,
     demandSpike: { Study: 0.95, Create: 0.20, Events: 0.10, Sports: 0.15, Outdoor: 0.10, Music: 0.10 },
     description: 'Final examinations across all departments.',
-    icon: '📚',
+    icon: 'ACAD',
   },
   {
     id: 'EVT-003',
@@ -25,7 +25,7 @@ export const CAMPUS_EVENTS = [
     daysAway: 9,
     demandSpike: { Music: 0.94, Events: 0.85, Create: 0.78, Sports: 0.25, Outdoor: 0.20, Study: 0.05 },
     description: 'Annual cultural performances, music and arts showcase.',
-    icon: '🎭',
+    icon: 'ARTS',
   },
   {
     id: 'EVT-004',
@@ -34,7 +34,7 @@ export const CAMPUS_EVENTS = [
     daysAway: 18,
     demandSpike: { Sports: 0.97, Outdoor: 0.80, Create: 0.55, Events: 0.40, Study: 0.05, Music: 0.10 },
     description: 'Inter-department sports competitions and outdoor activities.',
-    icon: '🏆',
+    icon: 'SPORT',
   },
 ];
 

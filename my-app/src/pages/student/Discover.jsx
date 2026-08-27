@@ -128,6 +128,41 @@ export const Discover = () => {
               <SlidersHorizontal size={18} />
             </Button>
           </div>
+
+          {/* Innovation Spotlight Banners */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div
+              onClick={() => navigate('/solution')}
+              className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer flex items-center justify-between group"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                  🎬 Solution Builder
+                </span>
+                <p className="text-xs font-semibold text-[var(--text-primary)]">Need a reel, presentation, or trek?</p>
+                <p className="text-[10px] text-[var(--text-secondary)]">Assemble full kits across multiple student owners →</p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                ✨
+              </div>
+            </div>
+
+            <div
+              onClick={() => navigate('/demand')}
+              className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 hover:border-amber-500/40 transition-all cursor-pointer flex items-center justify-between group"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  ⚡ Predictive Demand
+                </span>
+                <p className="text-xs font-semibold text-[var(--text-primary)]">Annual Tech Fest in 5 days</p>
+                <p className="text-[10px] text-[var(--text-secondary)]">Cameras & Audio 91% demand surge. Reserve early →</p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform font-bold">
+                ⚡
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Mobile filters */}

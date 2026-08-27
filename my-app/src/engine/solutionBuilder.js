@@ -39,8 +39,17 @@ const SLOT_CAPS = {
 function slotScore(resource, slot) {
   const caps = SLOT_CAPS[slot] ?? [];
   const resCaps = resource.capabilities ?? [];
-  const matched = caps.filter(c => resCaps.includes(c)).length;
-  return caps.length > 0 ? matched / caps.length : 0;
+  const matchedCaps = caps.filter(c => resCaps.includes(c)).length;
+  let score = caps.length > 0 ? (matchedCaps / caps.length) * 0.7 : 0;
+
+  const slotLower = slot.toLowerCase();
+  const nameLower = resource.name.toLowerCase();
+  const descLower = (resource.description ?? '').toLowerCase();
+
+  if (nameLower.includes(slotLower)) score += 0.3;
+  else if (descLower.includes(slotLower)) score += 0.15;
+
+  return score;
 }
 
 // ─── Build solution bundles from a need string ────────────────────

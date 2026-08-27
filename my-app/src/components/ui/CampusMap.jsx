@@ -4,8 +4,6 @@ import { CAMPUS_CENTER } from '../../data/mockDb';
 
 // ─── Projection constants ─────────────────────────────────────────
 const W = 800, H = 500;
-const LAT_MIN = 19.0725, LAT_MAX = 19.0805;
-const LNG_MIN = 19.0725, LNG_MAX = 72.8820; // fixed below
 const LNG_RANGE_MIN = 72.8740, LNG_RANGE_MAX = 72.8820;
 const LAT_RANGE_MIN = 19.0725, LAT_RANGE_MAX = 19.0805;
 
@@ -282,8 +280,8 @@ export function CampusMap({ mode = 'single', resource, resources = [] }) {
         <svg
           ref={svgRef}
           viewBox={vb.join(' ')}
-          className="absolute inset-0 w-full h-full"
-          style={{ cursor: drag.current ? 'grabbing' : 'grab', touchAction: 'none' }}
+          className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"
+          style={{ touchAction: 'none' }}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}

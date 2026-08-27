@@ -106,6 +106,15 @@ export const NeedDiscovery = () => {
               <Button className="w-full gap-2" onClick={handleAnalyze} disabled={!input.trim()}>
                 <Sparkles size={16} /> Understand my need
               </Button>
+
+              <div className="pt-2 text-center">
+                <button
+                  onClick={() => navigate('/solution')}
+                  className="text-xs text-[var(--accent)] hover:underline font-medium inline-flex items-center gap-1"
+                >
+                  Need a full multi-item setup? Try the Solution Builder →
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -169,6 +178,37 @@ export const NeedDiscovery = () => {
                 </div>
               )}
             </Card>
+
+            {/* Multi-Resource Complete Solution Kit Banner */}
+            {interpreted.suggestedTypes.length > 1 && (
+              <Card className="border-2 border-blue-500/30 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/5 space-y-3 p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider">
+                        🎬 Complete Solution Available
+                      </span>
+                      <span className="text-xs font-semibold text-[var(--text-primary)]">
+                        {interpreted.suggestedTypes.length} Items Kit
+                      </span>
+                    </div>
+                    <h4 className="font-serif text-base font-bold text-[var(--text-primary)]">
+                      Don't just borrow one item — assemble the full multi-owner kit
+                    </h4>
+                    <p className="text-xs text-[var(--text-secondary)]">
+                      Assembled from campus peers: {interpreted.suggestedTypes.join(' + ')}.
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="shrink-0 gap-1.5"
+                    onClick={() => navigate('/solution', { state: { needText: input } })}
+                  >
+                    View Complete Kit <ArrowRight size={14} />
+                  </Button>
+                </div>
+              </Card>
+            )}
 
             {/* Results */}
             <div className="space-y-4">

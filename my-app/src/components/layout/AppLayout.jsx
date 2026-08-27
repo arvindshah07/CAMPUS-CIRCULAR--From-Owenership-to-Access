@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Sparkles, ArrowLeftRight, Users, BarChart2, User, LayoutDashboard, Sun, Moon, Monitor, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { Home, Sparkles, Package, Zap, MapPin, ArrowLeftRight, Users, BarChart2, User, LayoutDashboard, Sun, Moon, Monitor, ChevronLeft, ChevronRight, LogOut, Building2 } from 'lucide-react';
 import { useAppStore } from '../../app/store';
 
 const NAV_ITEMS = [
-  { label: 'Discover',    path: '/',          icon: Home },
-  { label: 'Need AI',     path: '/needs',     icon: Sparkles },
-  { label: 'Exchanges',   path: '/exchanges', icon: ArrowLeftRight },
-  { label: 'Community',   path: '/community', icon: Users },
-  { label: 'Impact',      path: '/impact',    icon: BarChart2 },
-  { label: 'Profile',     path: '/profile',   icon: User },
-  { label: 'Admin',       path: '/admin',     icon: LayoutDashboard },
+  { label: 'Discover',     path: '/',             icon: Home },
+  { label: 'Need AI',      path: '/needs',        icon: Sparkles },
+  { label: 'Solutions',    path: '/solution',     icon: Package },
+  { label: 'Demand',       path: '/demand',       icon: Zap },
+  { label: 'Campus Map',   path: '/map',          icon: MapPin },
+  { label: 'Intelligence', path: '/intelligence', icon: Building2 },
+  { label: 'Exchanges',    path: '/exchanges',    icon: ArrowLeftRight },
+  { label: 'Community',    path: '/community',    icon: Users },
+  { label: 'Impact',       path: '/impact',       icon: BarChart2 },
+  { label: 'Profile',      path: '/profile',      icon: User },
+  { label: 'Admin',        path: '/admin',        icon: LayoutDashboard },
 ];
 
 const THEME_OPTIONS = [

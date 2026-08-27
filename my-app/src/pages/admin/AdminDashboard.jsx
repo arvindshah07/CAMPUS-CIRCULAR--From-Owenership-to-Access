@@ -98,7 +98,9 @@ function UsersTab({ users, flagUser }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-sm text-[var(--text-primary)]">{user.name}</div>
-            <div className="text-xs text-[var(--text-secondary)]">{user.department} · Trust {user.trustScore}</div>
+            <div className="text-xs text-[var(--text-secondary)]">
+              {user.department} · Phone: {user.phone || '+91 98201 45892'} · Trust {user.trustScore}
+            </div>
           </div>
           <Badge variant={user.status === 'FLAGGED' ? 'danger' : 'success'}>{user.status ?? 'ACTIVE'}</Badge>
           {user.status !== 'FLAGGED' && (
