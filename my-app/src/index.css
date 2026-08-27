@@ -1,62 +1,96 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
-
-  --color-canvas: #fbfbf9;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f3f3f0;
-  
-  --color-primary: #111827;
-  --color-primary-hover: #374151;
-  --color-accent: #0f172a;
-  
-  --color-text-main: #111827;
-  --color-text-muted: #6b7280;
-  --color-text-light: #9ca3af;
-  
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-border: #e5e7eb;
-
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --bg:             #f8f8f5;
+  --surface:        #ffffff;
+  --surface-raised: #f3f3f0;
+  --surface-hover:  #eeeeeb;
+  --text-primary:   #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary:  #9ca3af;
+  --border:         #e5e7eb;
+  --border-strong:  #d1d5db;
+  --accent:         #111827;
+  --accent-hover:   #374151;
+  --success:        #10b981;
+  --warning:        #f59e0b;
+  --danger:         #ef4444;
+  --overlay:        rgba(0,0,0,0.4);
 }
 
+[data-theme="dark"] {
+  --bg:             #0f0f0d;
+  --surface:        #1a1a17;
+  --surface-raised: #222220;
+  --surface-hover:  #2a2a27;
+  --text-primary:   #f0efe8;
+  --text-secondary: #9ca3af;
+  --text-tertiary:  #6b7280;
+  --border:         #2e2e2b;
+  --border-strong:  #3d3d3a;
+  --accent:         #f0efe8;
+  --accent-hover:   #d1d0c8;
+  --success:        #10b981;
+  --warning:        #f59e0b;
+  --danger:         #ef4444;
+  --overlay:        rgba(0,0,0,0.6);
+}
+
+/* ─── Tailwind v4 Theme Mapping ─────────────────────────────── */
+@theme {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SF Mono", "Fira Code", monospace;
+
+  --color-bg:             var(--bg);
+  --color-surface:        var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover:  var(--surface-hover);
+
+  --color-text-main:      var(--text-primary);
+  --color-text-muted:     var(--text-secondary);
+  --color-text-light:     var(--text-tertiary);
+
+  --color-primary:        var(--accent);
+  --color-primary-hover:  var(--accent-hover);
+
+  --color-border:         var(--border);
+  --color-border-strong:  var(--border-strong);
+
+  --color-success:        var(--success);
+  --color-warning:        var(--warning);
+  --color-danger:         var(--danger);
+}
+
+/* ─── Base ──────────────────────────────────────────────────── */
+html { background-color: var(--bg); }
+
 body {
-  background-color: var(--color-canvas);
-  color: var(--color-text-main);
+  background-color: var(--bg);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-serif); }
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* ─── Focus ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-text-light);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
-
+/* ─── Reduced Motion ────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
+  *, ::before, ::after {
     animation-delay: -1ms !important;
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
@@ -66,3 +100,9 @@ h1, h2, h3, h4, h5, h6 {
     transition-delay: 0s !important;
   }
 }
+
+/* ─── Utilities ─────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.font-mono { font-family: var(--font-mono); }
